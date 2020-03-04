@@ -1,0 +1,34 @@
+#!/bin/sh
+
+IFS=''
+# This is the old and simple code, which we can't grep, unfortunately
+#wdiff \
+#    --start-delete=`tput setaf 1; tput bold` \
+#    --end-delete=`tput sgr0` \
+#    --start-insert=`tput setaf 2; tput bold` \
+#    --end-insert=`tput sgr0` \
+#    $@
+
+if [ "$IS_GIT_DIFF" ]; then
+cat <<EOF
+`tput setaf 4; tput bold`$1 => $2`tput sgr0`
+EOF
+fi
+
+esc="$(printf \033)"
+start_insert="$esc"i
+end_insert="$esc"I
+start_delete="$esc"d
+end_delete="$esc"D
+
+wdiff --avoid-wraps \
+    --start-insert="$start_insert" --end-insert="$end_insert" \
+    --start-delete="$start_delete" --end-delete="$end_delete" \
+    $@ |
+    grep -P --context=2 \
+        "($start_insert|$end_insert|$start_delete|$end_delete)" |
+    sed "s,$start_insert,`tput setaf 2; tput bold`,g" |
+    sed "s,$end_insert,`tput sgr0`,g" |
+    sed "s,$start_delete,`tput setaf 1; tput bold`,g" |
+    sed "s,$end_delete,`tput sgr0`,g" |
+    cat

@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Script adapted from git-icdiff
+
+CWDIFF_OPTIONS=$(git config --get cwdiff.options)
+GITPAGER=$(git config --get cwdiff.pager)
+
+if [ -z "$GITPAGER" ]; then
+  if git config --get core.pager; then
+    GITPAGER=$(git config --get core.pager)
+  else
+    GITPAGER="${PAGER:-less}"
+  fi
+fi
+
+if [ "$GITPAGER" = "more" ] || [ "$GITPAGER" = "less" ]; then
+  GITPAGER="$GITPAGER -R"
+fi
+
+git difftool --no-prompt \
+    --extcmd="IS_GIT_DIFF=1 cwdiff $CWDIFF_OPTIONS" "$@" | $GITPAGER
