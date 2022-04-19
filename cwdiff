@@ -15,11 +15,10 @@ cat <<EOF
 EOF
 fi
 
-esc="$(printf \033)"
-start_insert="$esc"i
-end_insert="$esc"I
-start_delete="$esc"d
-end_delete="$esc"D
+start_insert=$'\ei'
+end_insert=$'\eI'
+start_delete=$'\ed'
+end_delete=$'\eD'
 
 wdiff --avoid-wraps \
     --start-insert="$start_insert" --end-insert="$end_insert" \
@@ -27,8 +26,8 @@ wdiff --avoid-wraps \
     $@ |
     grep -P --context=2 \
         "($start_insert|$end_insert|$start_delete|$end_delete)" |
-    sed "s,$start_insert,`tput setaf 2; tput bold`,g" |
-    sed "s,$end_insert,`tput sgr0`,g" |
-    sed "s,$start_delete,`tput setaf 1; tput bold`,g" |
-    sed "s,$end_delete,`tput sgr0`,g" |
+    sed "s,$start_insert,"$'\e[32m',g |
+    sed "s,$end_insert,"$'\e[0m',g |
+    sed "s,$start_delete,"$'\e[31m',g |
+    sed "s,$end_delete,"$'\e[0m',g |
     cat
